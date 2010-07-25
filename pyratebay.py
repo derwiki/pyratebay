@@ -10,7 +10,14 @@ class PyPirate(object):
 
 	def _get_page_descriptor(self, query):
 		tpb_search_url = self.tpb_search_url % '+'.join(query)
-		return urllib2.urlopen(tpb_search_url)
+		MAX_TRIES = 3
+		for retry in range(MAX_TRIES):
+			try:
+				return urllib2.urlopen(tpb_search_url)
+			except urllib2.URLError:
+				print "Timeout opening URL, trying %d more times" % (MAX_TRIES - retry)
+		print "Could not connect to host, please make sure your internet is working."
+		sys.exit(-1)
 
 	def _parse_search_results(self, page, hide_noseeds=True, limit=None):
 		bs = BeautifulSoup.BeautifulSoup(page)
